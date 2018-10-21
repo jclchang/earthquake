@@ -26,8 +26,18 @@ Magnitude		Earthquake Effects
 6.1 to 6.9		#ae017e
 7.0 to 7.9		#7a0177
 8.0 or greater	#49006a
-
 */
+
+
+function getColor(d) {
+    return d >= 8.0  ? '#49006a' :
+           d >= 7.0  ? '#7a0177' :
+           d >= 6.1  ? '#ae017e' :
+           d >= 5.5  ? '#dd3497' :
+           d >= 2.5  ? '#f768a1' :
+                       '#fa9fb5';
+}
+
 
 function createFeatures(earthquakeData) {
   
@@ -37,29 +47,13 @@ function createFeatures(earthquakeData) {
 
 	// assign color based on magnitude
 	style: function(feature) {
-		var color = "";
-		if (feature.properties.mag >= 8.0) {
-			color = "#49006a";.0
-		}
-		else if (feature.properties.mag >= 7.0 ) {
-			color = "#7a0177";
-		}
-		else if (feature.properties.mag >= 6.1 ) {
-			color = "#ae017e";
-		}
-		else if (feature.properties.mag >= 5.5 ) {
-			color = "#dd3497";
-		}
-		else if (feature.properties.mag >= 2.5 ) {
-			color = "#f768a1";
-		}
-		else {
-			color = "#fa9fb5";
-		}
-
-        return {
-        	color: color,
-			fillColor: color,
+		return {
+        fillColor: getColor(feature.properties.mag),
+        weight: 2,
+        opacity: 1,
+        color: getColor(feature.properties.mag),
+        dashArray: '3',
+        fillOpacity: 0.7
         };
     },
 
@@ -114,7 +108,7 @@ function createMap(earthquakes) {
     center: [
       37.09, -95.71
     ],
-    zoom: 5,
+    zoom: 2,
     layers: [streetmap, earthquakes]
   });
   
@@ -127,46 +121,28 @@ function createMap(earthquakes) {
   
  // Set up the legend
   var legend = L.control({ position: "bottomright" });
-  
   legend.onAdd=function(){
 	  
-  var div=L.DomUtil.create("div", "info legend");
-  var magitudes=["2.5 or less","2.5 to 5.4", "5.5 to 6.0", "6.1 to 6.9", "7.0 to 7.9", "8.0 or greater"];
-  var colorList = ["#fa9fb5", "#f768a1", "#dd3497", "#ae017e", "#7a0177", "#49006a"];
-  var labels = [];
+	var div=L.DomUtil.create("div", "info legend");
+	var magitudes=[0, 2.5, 5.5, 6.1, 7.0, 8.0 ];
+	var colorList = ["#fa9fb5", "#f768a1", "#dd3497", "#ae017e", "#7a0177", "#49006a"];
+	var labels = [];
   
-  var legendInfo = "<h1>Magnitude</h1>" +
-        "<div class=\"labels\">" +
-        "<div class=\"min\">" + magitudes[0] + "</div>" +
-        "<div class=\"max\">" + magitudes[magitudes.length - 1] + "</div>" +
-      "</div>";
-
-    div.innerHTML = legendInfo;
-	concole.log(legendInfo);
+	var legendInfo = "<h3>Magnitude</h3>";
+	div.innerHTML = legendInfo;
 	
-    colorList.forEach(function(colorList, index) {
-      labels.push("<li style=\"background-color: " + colorList[index] + "\"></li>");
-    });
-
-/*
 	for (var i = 0; i < colorList.length; i++) {
-            div.innerHTML += 
-            labels.push(
-                '<i class="circle" style="background:' + colorList[i] + '"></i> ' +
-            (magitudes[i] ? magitudes[i] : '+'));
-
+        div.innerHTML +=
+            '<i style="background:' + getColor(magitudes[i] + 1) + '"></i> ' +
+            magitudes[i] + (magitudes[i + 1] ? '&ndash;' + magitudes[i + 1] + '<br>' : '+');
         }
-    
-	div.innerHTML += labels.join('<br>');	
-*/
-    div.innerHTML += "<ul>" + labels.join("") + "</ul>";
-	
-	console.log(div);
+		
+	//console.log(div);
 
-	//div.innerHTML='<div><b>Legend</b></div';	
     return div;  
   };
+  
   // Adding legend to the map
-  //legend.addTo(Map);
+  legend.addTo(myMap);
 
 };
